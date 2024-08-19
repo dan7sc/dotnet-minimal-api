@@ -44,7 +44,7 @@ public class VehicleService : IVehicleService
         _context.SaveChanges();
     }
 
-    public Vehicle? SearchById(int id)
+    public Vehicle? FindById(int id)
     {
         return _context.Vehicles.Where(v => v.Id == id).FirstOrDefault();
     }
