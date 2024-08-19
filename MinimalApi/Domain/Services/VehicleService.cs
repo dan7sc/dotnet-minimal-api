@@ -14,7 +14,7 @@ public class VehicleService : IVehicleService
         _context = context;
     }
 
-    public List<Vehicle>? All(int page, string? name, string? make)
+    public List<Vehicle>? All(string? name, string? make, int? page = 1)
     {
         var query = _context.Vehicles.AsQueryable();
         if (!string.IsNullOrEmpty(name))
@@ -23,7 +23,11 @@ public class VehicleService : IVehicleService
         }
 
         int itemsPerPage = 10;
-        query = query.Skip((page - 1) * itemsPerPage).Take(itemsPerPage);
+
+        if (page != null)
+        {
+            query = query.Skip(((int)page - 1) * itemsPerPage).Take(itemsPerPage);
+        }
 
         return query.ToList();
     }
