@@ -1,0 +1,11 @@
+version: '3.9'
+
+services:
+  mysqldb:
+    image: docker.io/library/mysql:8
+    restart: always
+    environment:
+      MYSQL_DATABASE: MinApiDB
+      MYSQL_ROOT_PASSWORD: minSQL#8
+    ports:
+      - 3306:3306
