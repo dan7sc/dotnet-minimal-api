@@ -14,6 +14,7 @@ public class DatabaseContext : DbContext
     }
 
     public DbSet<Administrator> Administrators { get; set; }
+    public DbSet<Vehicle> Vehicles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
