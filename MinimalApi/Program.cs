@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MinimalApi.Domain.DTOs;
 using MinimalApi.Domain.Entities;
+using MinimalApi.Domain.Enums;
 using MinimalApi.Domain.Interfaces;
 using MinimalApi.Domain.ModelViews;
 using MinimalApi.Domain.Services;
@@ -43,6 +44,79 @@ app.MapPost("/administrators/login", ([FromBody] LoginDTO loginDTO, IAdministrat
         return Results.Unauthorized();
     }
 }).WithTags("Administrators");
+
+app.MapGet("/administrators", ([FromQuery] int? page, IAdministratorService administratorService) =>
+{
+    var administrators = new List<AdministratorModelView>();
+    var allAdministrators = administratorService.All(page);
+    foreach (var adm in allAdministrators)
+    {
+        administrators.Add(new AdministratorModelView
+        {
+            Id = adm.Id,
+            Email = adm.Email,
+            Profile = adm.Profile,
+        });
+    }
+    return Results.Ok(administrators);
+}).WithTags("Administrators");
+
+app.MapGet("/administrators/{id}", ([FromRoute] int id, IAdministratorService administratorService) =>
+{
+    var administrator = administratorService.FindById(id);
+
+    if (administrator == null) return Results.NotFound();
+    return Results.Ok(new AdministratorModelView
+    {
+        Id = administrator.Id,
+        Email = administrator.Email,
+        Profile = administrator.Profile,
+    });
+}).WithTags("Administrators");
+
+app.MapPost("/administrators", ([FromBody] AdministratorDTO administratorDTO, IAdministratorService administratorService) =>
+{
+    var validations = new ValidationError
+    {
+        Messages = new List<string>()
+    };
+
+    if (string.IsNullOrEmpty(administratorDTO.Email))
+    {
+        validations.Messages.Add("Email cannot be empty");
+    }
+
+    if (string.IsNullOrEmpty(administratorDTO.Password))
+    {
+        validations.Messages.Add("Password cannot be empty");
+    }
+
+    if (administratorDTO.Profile == null)
+    {
+        validations.Messages.Add("Profile cannot be empty");
+    }
+
+    if (validations.Messages.Count > 0)
+    {
+        return Results.BadRequest(validations.Messages);
+    }
+
+    var administrator = new Administrator
+    {
+        Email = administratorDTO.Email,
+        Password = administratorDTO.Password,
+        Profile = administratorDTO.Profile.ToString() ?? Profile.Editor.ToString(),
+    };
+    administratorService.Insert(administrator);
+
+    return Results.Created($"/administrator/{administrator.Id}", new AdministratorModelView
+    {
+        Id = administrator.Id,
+        Email = administrator.Email,
+        Profile = administrator.Profile,
+    });
+}).WithTags("Administrators");
+
 #endregion
 
 #region Vehicles
